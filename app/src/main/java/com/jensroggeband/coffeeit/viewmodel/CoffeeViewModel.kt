@@ -7,7 +7,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jensroggeband.coffeeit.data.CoffeeRepository
 import com.jensroggeband.coffeeit.data.network.model.toModel
+import com.jensroggeband.coffeeit.model.Coffee
 import com.jensroggeband.coffeeit.model.CoffeeMachine
+import com.jensroggeband.coffeeit.model.Selection
+import com.jensroggeband.coffeeit.model.Size
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -36,10 +39,21 @@ class CoffeeViewModel @Inject constructor(
         }
     }
 
+    fun selectCoffee(selection: Selection) {
+        val coffee = if (selection is Coffee) selection else return
+        coffeeUiState = coffeeUiState.copy(selectedCoffee = coffee)
+    }
+
+    fun selectSize(size: Selection) {
+        coffeeUiState = coffeeUiState.copy(selectedSize = Size(size.name))
+    }
+
 }
 
 data class CoffeeUIState(
     val machine: CoffeeMachine? = null,
+    val selectedCoffee: Coffee? = null,
+    val selectedSize: Size? = null,
     val isLoading: Boolean = false,
     val throwError: Boolean = false
 )

@@ -1,5 +1,5 @@
 package com.jensroggeband.coffeeit.model
 
-data class Extra(
-    val name: String
-)
+class Extra(
+    name: String
+): Selection(name)
