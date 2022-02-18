@@ -35,6 +35,7 @@ class CoffeeViewModel @Inject constructor(
             }
         }
     }
+
 }
 
 data class CoffeeUIState(

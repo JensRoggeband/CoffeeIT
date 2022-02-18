@@ -2,14 +2,15 @@ package com.jensroggeband.coffeeit
 
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
-import com.jensroggeband.coffeeit.model.CoffeeMachine
-import com.jensroggeband.coffeeit.ui.coffee.StyleView
+import com.jensroggeband.coffeeit.model.Coffee
+import com.jensroggeband.coffeeit.model.Selection
+import com.jensroggeband.coffeeit.ui.coffee.OptionsView
 import com.jensroggeband.coffeeit.ui.theme.CoffeeTheme
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-class ProductScreenTest {
+class CoffeeScreenTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
@@ -18,16 +19,15 @@ class ProductScreenTest {
     fun setUp() {
         composeTestRule.setContent {
             CoffeeTheme {
-                StyleView(
-                    coffeeMachine = CoffeeMachine(
-                        types = listOf(
-                            "Ristretto",
-                            "Cappuccino",
-                            "Espresso",
-                            "Americano",
-                            "Latte machiatto",
-                        )
-                    )
+                OptionsView(
+                    options = listOf(
+                        Coffee("Ristretto", listOf(), listOf()),
+                        Coffee("Cappuccino", listOf(), listOf()),
+                        Coffee("Espresso", listOf(), listOf()),
+                        Coffee("Americano", listOf(), listOf()),
+                        Coffee("Latte machiatto", listOf(), listOf()),
+                    ),
+                    onClick = {}
                 )
             }
         }

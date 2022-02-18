@@ -4,6 +4,8 @@
     <string name="navigation_screen_home">Home</string>
     <string name="navigation_screen_coffee">Coffee</string>
 
+    <string name="button_brew_coffee">Brew your coffee</string>
+
     <string name="screen_message_error_state">Something went wrong…</string>
     <string name="screen_message_empty_state">Nothing to see here…</string>
 

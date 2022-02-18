@@ -1,8 +1,7 @@
 package com.jensroggeband.coffeeit
 
 import com.jensroggeband.coffeeit.data.CoffeeRepository
-import com.jensroggeband.coffeeit.data.network.model.CoffeeMachine
-import com.jensroggeband.coffeeit.data.network.model.Type
+import com.jensroggeband.coffeeit.data.network.model.*
 import com.jensroggeband.coffeeit.viewmodel.CoffeeViewModel
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
@@ -39,26 +38,21 @@ class CoffeeViewModelTest {
 
     @Test
     fun productUiStateIsCorrectlyUpdatedAfterSuccess() {
-        coEvery { repository.getMachine(any()) } returns Response.success(CoffeeMachine(
-            types = listOf(
-                Type(
-                    id = "123",
-                    name = "Ristretto",
-                    sizes = listOf(),
-                    extras = listOf()
-                )
-            ),
-            sizes = listOf(),
-            extras = listOf()
-        ))
+        coEvery { repository.getMachine(any()) } returns Response.success(coffeeMachine())
 
         assertNull(viewModel.coffeeUiState.machine)
 
         viewModel.fetchMachine("123")
 
-        assertEquals(com.jensroggeband.coffeeit.model.CoffeeMachine(
-            types = listOf("Ristretto")
-        ), viewModel.coffeeUiState.machine)
+        assertEquals(1, viewModel.coffeeUiState.machine?.types?.size)
+        assertEquals("Ristretto", viewModel.coffeeUiState.machine?.types?.get(0)?.name)
+
+        assertEquals(2, viewModel.coffeeUiState.machine?.types?.get(0)?.sizes?.size)
+        assertEquals("Large", viewModel.coffeeUiState.machine?.types?.get(0)?.sizes?.get(0)?.name)
+        assertEquals("Venti", viewModel.coffeeUiState.machine?.types?.get(0)?.sizes?.get(1)?.name)
+
+        assertEquals(1, viewModel.coffeeUiState.machine?.types?.get(0)?.extras?.size)
+        assertEquals("Select the amount of sugar", viewModel.coffeeUiState.machine?.types?.get(0)?.extras?.get(0)?.name)
     }
 
     @Test
@@ -75,4 +69,49 @@ class CoffeeViewModelTest {
         assertTrue(viewModel.coffeeUiState.throwError)
     }
 
+    private fun coffeeMachine() = CoffeeMachine(
+        types = listOf(
+            Type(
+                id = "123",
+                name = "Ristretto",
+                sizes = listOf(
+                    "4",
+                    "5"
+                ),
+                extras = listOf(
+                    "7"
+                )
+            )
+        ),
+        sizes = listOf(
+            Size(
+                id = "4",
+                name = "Large"
+            ),
+            Size(
+                id = "5",
+                name = "Venti"
+            ),
+            Size(
+                id = "6",
+                name = "Tall"
+            )
+        ),
+        extras = listOf(
+            Extra(
+                id = "7",
+                name = "Select the amount of sugar",
+                subSelections = listOf(
+                    SubSelection(
+                        id = "10",
+                        name = "A lot"
+                    ),
+                    SubSelection(
+                        id = "11",
+                        name = "Normal"
+                    )
+                )
+            )
+        )
+    )
 }
