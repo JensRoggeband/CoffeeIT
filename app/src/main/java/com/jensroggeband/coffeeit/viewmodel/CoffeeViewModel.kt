@@ -46,9 +46,24 @@ class CoffeeViewModel @Inject constructor(
         coffeeUiState = coffeeUiState.copy(selectedSize = size)
     }
 
-    fun selectExtras(selection: Selection) {
+    fun selectExtras(selection: Selection, isSelected: Boolean) {
         val extras = if (selection is Extra) selection else return
-        coffeeUiState = coffeeUiState.copy(selectedExtras = extras)
+        val newExtras = coffeeUiState.selectedExtras.toMutableList()
+        if (isSelected) {
+            newExtras.add(extras)
+        }
+        else {
+            newExtras.remove(extras)
+        }
+        coffeeUiState = coffeeUiState.copy(selectedExtras = newExtras)
+    }
+
+    fun changeExtras(selection: Selection) {
+        val extras = if (selection is Extra) selection else return
+        val newExtras = coffeeUiState.selectedExtras.toMutableList()
+        val item = newExtras.find { it.name == extras.name }
+        newExtras[newExtras.indexOf(item)] = extras
+        coffeeUiState = coffeeUiState.copy(selectedExtras = newExtras)
     }
 
 }
@@ -57,7 +72,7 @@ data class CoffeeUIState(
     val machine: CoffeeMachine? = null,
     val selectedCoffee: Coffee? = null,
     val selectedSize: Size? = null,
-    val selectedExtras: Extra? = null,
+    val selectedExtras: List<Extra> = listOf(),
     val isLoading: Boolean = false,
     val throwError: Boolean = false
 )

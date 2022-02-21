@@ -4,7 +4,6 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,11 +27,11 @@ fun SizesScreen(options: List<Selection>, onSelectOption: (Selection) -> Unit) {
 }
 
 @Composable
-fun ExtrasScreen(options: List<Selection>, onSelectOption: (Selection) -> Unit, onNavigate: () -> Unit) {
+fun ExtrasScreen(options: List<Selection>, onAddOption: (Selection) -> Unit, onRemoveOption: (Selection) -> Unit, onChangeSubSelection: (Selection) -> Unit, onNavigate: () -> Unit) {
     Box(modifier = Modifier
         .fillMaxSize()
         .padding(8.dp)) {
-        ExpandableOptionsView(options, onSelectOption)
+        ExpandableOptionsView(options, onAddOption, onRemoveOption, onChangeSubSelection)
         CardView(
             modifier = Modifier.align(Alignment.BottomCenter),
             title = stringResource(id = R.string.button_confirm),
@@ -43,21 +42,37 @@ fun ExtrasScreen(options: List<Selection>, onSelectOption: (Selection) -> Unit, 
 
 @Composable
 fun OverviewScreen(uiState: CoffeeUIState, onClickBrewCoffee: () -> Unit) {
-    val selectedItems = listOfNotNull(uiState.selectedCoffee, uiState.selectedSize, uiState.selectedExtras)
+    val selectedItems = listOfNotNull(uiState.selectedCoffee, uiState.selectedSize)
+    val selectedExtras = uiState.selectedExtras
     Box(modifier = Modifier
         .fillMaxSize()
         .padding(8.dp)) {
-        LazyColumn(modifier = Modifier.align(Alignment.TopCenter), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(selectedItems) {
-                val selectedOption: Selection? = it.selectedOption
-                if (selectedOption != null) {
-                    ExpandableCardView(title = it.name, selection = it, subSelections = listOf(selectedOption), onClick = {}, defaultExpanded = true)
-                }
-                else {
+        Column(modifier = Modifier.align(Alignment.TopCenter)) {
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(selectedItems) {
                     CardView(title = it.name, onClick = {})
                 }
             }
+            if (selectedExtras.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(selectedExtras) {
+                        val selectedOption: Selection? = it.selectedOption
+                        if (selectedOption != null) {
+                            ExpandableCardView(
+                                title = it.name,
+                                parentSelection = it,
+                                subSelections = listOf(selectedOption),
+                                onAdd = {},
+                                onRemove = {},
+                                onChangeSubSelection = {}
+                            )
+                        }
+                    }
+                }
+            }
         }
+
         CardView(
             modifier = Modifier.align(Alignment.BottomCenter),
             title = stringResource(id = R.string.button_brew_coffee),
@@ -94,10 +109,17 @@ fun CardView(modifier: Modifier = Modifier, title: String, onClick: () -> Unit) 
 }
 
 @Composable
-fun ExpandableOptionsView(options: List<Selection>, onClick: (Selection) -> Unit) {
+fun ExpandableOptionsView(options: List<Selection>, onAdd: (Selection) -> Unit, onRemove: (Selection) -> Unit, onChangeSubSelection: (Selection) -> Unit) {
     LazyColumn(modifier = Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         items(options) { selection ->
-            ExpandableCardView(title = selection.name, selection = selection, subSelections = selection.subSelections, onClick = { onClick(it) })
+            ExpandableCardView(
+                title = selection.name,
+                parentSelection = selection,
+                subSelections = selection.subSelections,
+                onAdd = onAdd,
+                onRemove = onRemove,
+                onChangeSubSelection = onChangeSubSelection
+            )
         }
     }
 }
@@ -106,20 +128,28 @@ fun ExpandableOptionsView(options: List<Selection>, onClick: (Selection) -> Unit
 @Composable
 fun ExpandableCardView(
     modifier: Modifier = Modifier,
-    title: String, selection: Selection,
+    title: String,
+    parentSelection: Selection,
     subSelections: List<Selection>,
-    onClick: (Selection) -> Unit,
-    defaultExpanded: Boolean = false
+    onAdd: (Selection) -> Unit,
+    onRemove: (Selection) -> Unit,
+    onChangeSubSelection: (Selection) -> Unit
 ) {
-    var isExpanded by remember { mutableStateOf(defaultExpanded) }
-    val (selectedOption, onOptionSelected) = remember { mutableStateOf(subSelections[0]) }
+    val expanded = parentSelection.selectedOption != null
+    var isExpanded by remember { mutableStateOf(expanded) }
+    val (selectedOption, onOptionSelected) = remember { mutableStateOf( parentSelection.selectedOption ?: subSelections[0]) }
 
     Card(
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = {
                 isExpanded = !isExpanded
-                onClick(selection)
+                val option = Extra(
+                    name = parentSelection.name,
+                    selectedSubOption = ExtraSelection(selectedOption.name),
+                    subSelections = listOf()
+                )
+                if (isExpanded) onAdd(option) else onRemove(option)
             }),
         containerColor = MaterialTheme.colorScheme.primaryContainer,
         content = {
@@ -134,7 +164,7 @@ fun ExpandableCardView(
                         Text(text = it.name)
                         RadioButton(selected = (it == selectedOption), onClick = {
                             onOptionSelected(it)
-                            onClick(Extra(name = selection.name, selectedSubOption = ExtraSelection(it.name), subSelections = listOf()))
+                            onChangeSubSelection(Extra(name = parentSelection.name, selectedSubOption = ExtraSelection(it.name), subSelections = listOf()))
                         })
                     }
                 }

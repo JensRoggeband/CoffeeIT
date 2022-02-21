@@ -98,14 +98,17 @@ class MainActivity : ComponentActivity() {
             composable(Screen.Extras.route) {
                 ExtrasScreen(
                     options = coffeeViewModel.coffeeUiState.selectedCoffee?.extras ?: listOf(),
-                    onSelectOption = { coffeeViewModel.selectExtras(it) },
+                    onAddOption = { coffeeViewModel.selectExtras(it, true) },
+                    onRemoveOption = { coffeeViewModel.selectExtras(it, false) },
+                    onChangeSubSelection = { coffeeViewModel.changeExtras(it) },
                     onNavigate = { navController.navigate("overview") }
                 )
             }
             composable(Screen.Overview.route) {
-                OverviewScreen(coffeeViewModel.coffeeUiState) {
-                    // Brew the coffee
-                }
+                OverviewScreen(
+                    uiState = coffeeViewModel.coffeeUiState,
+                    onClickBrewCoffee = { /* Confirm selections in API and brew the coffee! */ }
+                )
             }
         }
     }
