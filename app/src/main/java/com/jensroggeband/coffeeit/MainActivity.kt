@@ -96,13 +96,14 @@ class MainActivity : ComponentActivity() {
                 }
             }
             composable(Screen.Extras.route) {
-                ExtrasScreen(coffeeViewModel.coffeeUiState.selectedCoffee?.extras ?: listOf()) {
-                    coffeeViewModel.selectSize(it)
-                    navController.navigate("overview")
-                }
+                ExtrasScreen(
+                    options = coffeeViewModel.coffeeUiState.selectedCoffee?.extras ?: listOf(),
+                    onSelectOption = { coffeeViewModel.selectExtras(it) },
+                    onNavigate = { navController.navigate("overview") }
+                )
             }
             composable(Screen.Overview.route) {
-                OverviewScreen(coffeeViewModel.coffeeUiState.selectedCoffee!!, coffeeViewModel.coffeeUiState.selectedSize!!) {
+                OverviewScreen(coffeeViewModel.coffeeUiState) {
                     // Brew the coffee
                 }
             }
