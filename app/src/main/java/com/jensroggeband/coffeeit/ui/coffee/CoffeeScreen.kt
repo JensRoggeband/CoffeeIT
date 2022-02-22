@@ -6,6 +6,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.mapSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -136,8 +138,10 @@ fun ExpandableCardView(
     onChangeSubSelection: (Selection) -> Unit
 ) {
     val expanded = parentSelection.selectedOption != null
-    var isExpanded by remember { mutableStateOf(expanded) }
-    val (selectedOption, onOptionSelected) = remember { mutableStateOf( parentSelection.selectedOption ?: subSelections[0]) }
+    var isExpanded by rememberSaveable { mutableStateOf(expanded) }
+    val defaultIndex = if (parentSelection.selectedOption != null) subSelections.indexOf(parentSelection.selectedOption) else 0
+    val (selectedOptionIndex, onOptionSelected) = rememberSaveable { mutableStateOf(defaultIndex) }
+    val selectedOption = subSelections[selectedOptionIndex]
 
     Card(
         modifier = modifier
@@ -159,13 +163,22 @@ fun ExpandableCardView(
                 maxLines = 2,
             )
             if (isExpanded) {
-                subSelections.forEach {
+                subSelections.forEachIndexed { index, subSelection ->
                     Row {
-                        Text(text = it.name)
-                        RadioButton(selected = (it == selectedOption), onClick = {
-                            onOptionSelected(it)
-                            onChangeSubSelection(Extra(name = parentSelection.name, selectedSubOption = ExtraSelection(it.name), subSelections = listOf()))
-                        })
+                        Text(text = subSelection.name)
+                        RadioButton(
+                            selected = (selectedOptionIndex == index),
+                            onClick = {
+                                onOptionSelected(index)
+                                onChangeSubSelection(
+                                    Extra(
+                                        name = parentSelection.name,
+                                        selectedSubOption = ExtraSelection(subSelection.name),
+                                        subSelections = listOf()
+                                    )
+                                )
+                            }
+                        )
                     }
                 }
             }
