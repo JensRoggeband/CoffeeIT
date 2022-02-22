@@ -4,12 +4,14 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.mapSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.jensroggeband.coffeeit.R
@@ -90,7 +92,7 @@ fun OptionsView(options: List<Selection>, onClick: (Selection) -> Unit) {
 
 @Composable
 fun ExpandableOptionsView(options: List<Selection>, onAdd: (Selection) -> Unit, onRemove: (Selection) -> Unit, onChangeSubSelection: (Selection) -> Unit) {
-    LazyColumn(modifier = Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         items(options) { selection ->
             ExpandableCardView(
                 title = selection.name,
@@ -159,24 +161,43 @@ fun ExpandableCardView(
                 maxLines = 2,
             )
             if (isExpanded) {
+                Divider(modifier = Modifier
+                    .padding(8.dp)
+                    .background(MaterialTheme.colorScheme.onPrimaryContainer))
                 subSelections.forEachIndexed { index, subSelection ->
-                    Row {
-                        Text(text = subSelection.name)
-                        RadioButton(
-                            selected = (selectedOptionIndex == index),
-                            onClick = {
-                                onOptionSelected(index)
-                                onChangeSubSelection(
-                                    Extra(
-                                        name = parentSelection.name,
-                                        selectedSubOption = ExtraSelection(subSelection.name),
-                                        subSelections = listOf()
-                                    )
-                                )
-                            }
+                    val onClick = {
+                        onOptionSelected(index)
+                        onChangeSubSelection(
+                            Extra(
+                                name = parentSelection.name,
+                                selectedSubOption = ExtraSelection(subSelection.name),
+                                subSelections = listOf()
+                            )
                         )
                     }
+                    Card(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp, vertical = 4.dp)
+                            .fillMaxWidth()
+                            .clickable(onClick = onClick),
+                        containerColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .weight(3f),
+                                text = subSelection.name,
+                            )
+                            RadioButton(
+                                modifier = Modifier.weight(1f),
+                                selected = (selectedOptionIndex == index),
+                                onClick = onClick
+                            )
+                        }
+                    }
                 }
+                Spacer(modifier = Modifier.height(8.dp))
             }
         }
     )
