@@ -86,6 +86,8 @@ class MainActivity : ComponentActivity() {
                 )
             }
             composable(Screen.Coffee.route) {
+                coffeeViewModel.resetSizes()
+                coffeeViewModel.resetExtras()
                 StartScreen(
                     viewModel = coffeeViewModel,
                     onSelectOption = {
@@ -95,6 +97,7 @@ class MainActivity : ComponentActivity() {
                 )
             }
             composable(Screen.Sizes.route) {
+                coffeeViewModel.resetExtras()
                 OptionsView(
                     options = coffeeViewModel.coffeeUiState.selectedCoffee?.sizes ?: listOf(),
                     onClick = {
@@ -115,6 +118,7 @@ class MainActivity : ComponentActivity() {
             composable(Screen.Overview.route) {
                 OverviewScreen(
                     uiState = coffeeViewModel.coffeeUiState,
+                    navController = navController,
                     onClickBrewCoffee = { /* Confirm selections in API and brew the coffee! */ }
                 )
             }

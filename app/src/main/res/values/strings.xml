@@ -8,6 +8,7 @@
     <string name="navigation_screen_overview">Overview</string>
 
     <string name="button_confirm">Confirm</string>
+    <string name="button_edit">Edit</string>
     <string name="button_brew_coffee">Brew your coffee</string>
 
     <string name="screen_message_error_state">Something went wrong…</string>

@@ -36,6 +36,14 @@ class CoffeeViewModel @Inject constructor(
         }
     }
 
+    fun resetSizes() {
+        coffeeUiState = coffeeUiState.copy(selectedSize = null)
+    }
+
+    fun resetExtras() {
+        coffeeUiState = coffeeUiState.copy(selectedExtras = emptyList())
+    }
+
     fun selectCoffee(selection: Selection) {
         val coffee = if (selection is Coffee) selection else return
         coffeeUiState = coffeeUiState.copy(selectedCoffee = coffee)

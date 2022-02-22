@@ -14,10 +14,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.jensroggeband.coffeeit.R
-import com.jensroggeband.coffeeit.model.Extra
-import com.jensroggeband.coffeeit.model.ExtraSelection
-import com.jensroggeband.coffeeit.model.Selection
+import com.jensroggeband.coffeeit.Screen
+import com.jensroggeband.coffeeit.model.*
 import com.jensroggeband.coffeeit.viewmodel.CoffeeUIState
 
 @Composable
@@ -41,7 +41,7 @@ fun ExtrasScreen(
 }
 
 @Composable
-fun OverviewScreen(uiState: CoffeeUIState, onClickBrewCoffee: () -> Unit) {
+fun OverviewScreen(uiState: CoffeeUIState, navController: NavHostController, onClickBrewCoffee: () -> Unit) {
     val selectedItems = listOfNotNull(uiState.selectedCoffee, uiState.selectedSize)
     val selectedExtras = uiState.selectedExtras
     Box(modifier = Modifier
@@ -50,7 +50,13 @@ fun OverviewScreen(uiState: CoffeeUIState, onClickBrewCoffee: () -> Unit) {
         Column(modifier = Modifier.align(Alignment.TopCenter)) {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(selectedItems) {
-                    CardView(title = it.name, onClick = {})
+                    val onClick: () -> Unit = when (it) {
+                        is Coffee -> { { navController.navigate(Screen.Coffee.route) { popUpTo(Screen.Home.route) } } }
+                        is Size -> { { navController.navigate(Screen.Sizes.route) { popUpTo(Screen.Coffee.route) } } }
+                        is Extra -> { { navController.navigate(Screen.Extras.route) { popUpTo(Screen.Sizes.route) } } }
+                        else -> { { navController.navigate(Screen.Coffee.route) { popUpTo(Screen.Home.route) } } }
+                    }
+                    CardView(title = it.name, onClick = onClick, withEditAction = true)
                 }
             }
             if (selectedExtras.isNotEmpty()) {
@@ -108,18 +114,29 @@ fun ExpandableOptionsView(options: List<Selection>, onAdd: (Selection) -> Unit, 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CardView(modifier: Modifier = Modifier, title: String, onClick: () -> Unit) {
+fun CardView(modifier: Modifier = Modifier, title: String, onClick: () -> Unit, withEditAction: Boolean = false) {
     Card(
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
         containerColor = MaterialTheme.colorScheme.primaryContainer,
         content = {
-            Text(
-                modifier = Modifier.padding(16.dp),
-                text = title,
-                maxLines = 2,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    modifier = Modifier.padding(16.dp).weight(3f),
+                    text = title
+                )
+                if (withEditAction) {
+                    Text(
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .weight(1f),
+                        text = stringResource(id = R.string.button_edit),
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+            }
+
         }
     )
 }
@@ -161,9 +178,7 @@ fun ExpandableCardView(
                 maxLines = 2,
             )
             if (isExpanded) {
-                Divider(modifier = Modifier
-                    .padding(8.dp)
-                    .background(MaterialTheme.colorScheme.onPrimaryContainer))
+                Divider(modifier = Modifier.padding(8.dp), color = MaterialTheme.colorScheme.onPrimaryContainer)
                 subSelections.forEachIndexed { index, subSelection ->
                     val onClick = {
                         onOptionSelected(index)
