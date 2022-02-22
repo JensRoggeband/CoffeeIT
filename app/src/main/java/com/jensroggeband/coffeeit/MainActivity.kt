@@ -8,10 +8,12 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -79,21 +81,27 @@ class MainActivity : ComponentActivity() {
     fun NavMain(navController: NavHostController, coffeeViewModel: CoffeeViewModel) {
         NavHost(navController, startDestination = Screen.Home.route) {
             composable(Screen.Home.route) {
-                Overview {
-                    navController.navigate("coffee")
-                }
+                Overview(
+                    onNavigate = { navController.navigate(Screen.Coffee.route) }
+                )
             }
             composable(Screen.Coffee.route) {
-                StartScreen(viewModel = coffeeViewModel, onSelectOption = {
-                    coffeeViewModel.selectCoffee(it)
-                    navController.navigate("sizes")
-                })
+                StartScreen(
+                    viewModel = coffeeViewModel,
+                    onSelectOption = {
+                        coffeeViewModel.selectCoffee(it)
+                        navController.navigate(Screen.Sizes.route)
+                    }
+                )
             }
             composable(Screen.Sizes.route) {
-                SizesScreen(coffeeViewModel.coffeeUiState.selectedCoffee?.sizes ?: listOf()) {
-                    coffeeViewModel.selectSize(it)
-                    navController.navigate("extras")
-                }
+                OptionsView(
+                    options = coffeeViewModel.coffeeUiState.selectedCoffee?.sizes ?: listOf(),
+                    onClick = {
+                        coffeeViewModel.selectSize(it)
+                        navController.navigate(Screen.Extras.route)
+                    }
+                )
             }
             composable(Screen.Extras.route) {
                 ExtrasScreen(
@@ -101,7 +109,7 @@ class MainActivity : ComponentActivity() {
                     onAddOption = { coffeeViewModel.selectExtras(it, true) },
                     onRemoveOption = { coffeeViewModel.selectExtras(it, false) },
                     onChangeSubSelection = { coffeeViewModel.changeExtras(it) },
-                    onNavigate = { navController.navigate("overview") }
+                    onNavigate = { navController.navigate(Screen.Overview.route) }
                 )
             }
             composable(Screen.Overview.route) {
@@ -116,9 +124,9 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Overview(onNavigate: () -> Unit) {
-    Column {
+    Box(modifier = Modifier.fillMaxSize()) {
         Text(text = "Tap the machine to start")
-        Button(onClick = onNavigate) {
+        Button(modifier = Modifier.align(Alignment.BottomCenter), onClick = onNavigate) {
             Text(text = "Start!")
         }
     }
@@ -144,7 +152,6 @@ fun StartScreen(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LoadingView(
     modifier: Modifier = Modifier,
@@ -155,7 +162,10 @@ fun LoadingView(
     Crossfade(targetState = coffeeUIState, modifier = modifier) { currentUiState ->
         when {
             currentUiState.machine != null -> {
-                CoffeeScreen(viewModel.coffeeUiState.machine?.types ?: listOf(), onSelectOption = onSelectOption)
+                OptionsView(
+                    options = viewModel.coffeeUiState.machine?.types ?: listOf(),
+                    onClick = onSelectOption
+                )
             }
             currentUiState.isLoading -> {
                 LoadingScreen()
@@ -170,7 +180,7 @@ fun LoadingView(
 sealed class Screen(val route: String, @StringRes val title: Int) {
     object Home : Screen(route = "home", title = R.string.navigation_screen_home)
     object Coffee : Screen(route = "coffee", title = R.string.navigation_screen_coffee)
-    object Sizes : Screen(route = "sizes", title = R.string.navigation_screen_coffee)
-    object Extras : Screen(route = "extras", title = R.string.navigation_screen_coffee)
-    object Overview : Screen(route = "overview", title = R.string.navigation_screen_coffee)
+    object Sizes : Screen(route = "sizes", title = R.string.navigation_screen_size)
+    object Extras : Screen(route = "extras", title = R.string.navigation_screen_extras)
+    object Overview : Screen(route = "overview", title = R.string.navigation_screen_overview)
 }

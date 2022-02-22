@@ -53,7 +53,7 @@ class CoffeeViewModel @Inject constructor(
             newExtras.add(extras)
         }
         else {
-            newExtras.removeAll {it.name == extras.name }
+            newExtras.removeAll { it.name == extras.name }
         }
         coffeeUiState = coffeeUiState.copy(selectedExtras = newExtras)
     }

@@ -19,17 +19,13 @@ import com.jensroggeband.coffeeit.model.Selection
 import com.jensroggeband.coffeeit.viewmodel.CoffeeUIState
 
 @Composable
-fun CoffeeScreen(options: List<Selection>, onSelectOption: (Selection) -> Unit) {
-    OptionsView(options, onSelectOption)
-}
-
-@Composable
-fun SizesScreen(options: List<Selection>, onSelectOption: (Selection) -> Unit) {
-    OptionsView(options, onSelectOption)
-}
-
-@Composable
-fun ExtrasScreen(options: List<Selection>, onAddOption: (Selection) -> Unit, onRemoveOption: (Selection) -> Unit, onChangeSubSelection: (Selection) -> Unit, onNavigate: () -> Unit) {
+fun ExtrasScreen(
+    options: List<Selection>,
+    onAddOption: (Selection) -> Unit,
+    onRemoveOption: (Selection) -> Unit,
+    onChangeSubSelection: (Selection) -> Unit,
+    onNavigate: () -> Unit
+) {
     Box(modifier = Modifier
         .fillMaxSize()
         .padding(8.dp)) {
@@ -92,6 +88,22 @@ fun OptionsView(options: List<Selection>, onClick: (Selection) -> Unit) {
     }
 }
 
+@Composable
+fun ExpandableOptionsView(options: List<Selection>, onAdd: (Selection) -> Unit, onRemove: (Selection) -> Unit, onChangeSubSelection: (Selection) -> Unit) {
+    LazyColumn(modifier = Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        items(options) { selection ->
+            ExpandableCardView(
+                title = selection.name,
+                parentSelection = selection,
+                subSelections = selection.subSelections,
+                onAdd = onAdd,
+                onRemove = onRemove,
+                onChangeSubSelection = onChangeSubSelection
+            )
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CardView(modifier: Modifier = Modifier, title: String, onClick: () -> Unit) {
@@ -108,22 +120,6 @@ fun CardView(modifier: Modifier = Modifier, title: String, onClick: () -> Unit) 
             )
         }
     )
-}
-
-@Composable
-fun ExpandableOptionsView(options: List<Selection>, onAdd: (Selection) -> Unit, onRemove: (Selection) -> Unit, onChangeSubSelection: (Selection) -> Unit) {
-    LazyColumn(modifier = Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        items(options) { selection ->
-            ExpandableCardView(
-                title = selection.name,
-                parentSelection = selection,
-                subSelections = selection.subSelections,
-                onAdd = onAdd,
-                onRemove = onRemove,
-                onChangeSubSelection = onChangeSubSelection
-            )
-        }
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

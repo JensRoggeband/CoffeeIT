@@ -3,6 +3,9 @@
 
     <string name="navigation_screen_home">Home</string>
     <string name="navigation_screen_coffee">Coffee</string>
+    <string name="navigation_screen_size">Size</string>
+    <string name="navigation_screen_extras">Extras</string>
+    <string name="navigation_screen_overview">Overview</string>
 
     <string name="button_confirm">Confirm</string>
     <string name="button_brew_coffee">Brew your coffee</string>
